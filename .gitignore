@@ -1,0 +1,14 @@
+
+# hsp
+hsptmp
+packfile
+*.ax
+obj
+
+# vscode
+.vscode
+
+memo/*
+note/*
+trash/*
+backup/*

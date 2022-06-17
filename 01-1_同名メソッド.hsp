@@ -1,0 +1,54 @@
+
+
+// ラベルを管理
+#enum global LABEL_TEST 0
+
+// ----------------------------------- //
+#module m1 labels // 1つ目のモジュール
+#modinit
+	ldim labels, 1
+	labels.LABEL_TEST = *test
+	return
+
+// fn_testで呼び出される
+*test
+	mes "test m1"
+	return "テスト１"
+#global
+
+// ----------------------------------- //
+#module m2 labels, msg // 2つ目のモジュール
+#modinit str _msg
+	msg = _msg
+	ldim labels, 1
+	labels.LABEL_TEST = *test
+	return
+
+// ここでモジュール内変数を使用するならthismodを使わないとできない？
+#modcfunc m2_test
+	mes "test m2" + msg
+	return "テスト２"
+
+// fn_testで呼び出される
+*test
+	return m2_test(thismod)
+#global
+
+// ----------------------------------- //
+#module interface labels // モジュールの親
+#modcfunc fn_test
+	gosub labels.LABEL_TEST
+	return refstr
+#global
+
+// ----------------------------------- //
+	// 別のモジュールで定義
+	dimtype k, vartype("struct")
+	newmod k, m1
+	newmod k, m2, "コンストラクタの引数が違う"
+	newmod k, m2, "３つめ"
+
+	// 同じ関数で呼び出し
+	foreach k
+		mes fn_test(k.cnt)
+	loop
