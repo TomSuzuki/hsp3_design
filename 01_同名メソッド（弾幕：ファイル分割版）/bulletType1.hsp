@@ -1,0 +1,20 @@
+// 通常の弾
+
+#module Bullet_TYPE1 labels, data
+#modinit double _x, double _y, double _angle, double _speed
+
+	// ラベルの設定
+	ldim labels, LABEL_NUM
+	;labels.LABEL_DISPLAY // オーバーライドしない
+	;labels.LABEL_UPDATE // オーバーライドしない
+
+	// データの設定
+	ddim data, DATA_NUM
+	data.DATA_X = _x
+	data.DATA_Y = _y
+	data.DATA_ANGLE = _angle
+	data.DATA_SPEED = _speed
+	
+	return
+
+#global

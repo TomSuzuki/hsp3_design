@@ -1,0 +1,39 @@
+// a2dを使用
+#include "a2d.hsp"
+
+// 共通関数の読み込み
+#include "common.hsp"
+
+// 弾の読み込み
+#include "bulletInterface.hsp"
+#include "bulletType1.hsp"
+#include "bulletType2.hsp"
+#include "bulletType3.hsp"
+
+// ゲーム制御の読み込み
+#include "game.hsp"
+
+	// 仮想イメージの作成
+	alCreateImage 0, 640, 480
+
+	// 描画設定
+	alFont msgothic, 12, 1
+
+	// ゲーム初期化
+	gameInit
+
+	// メイン
+	repeat
+		redraw 0
+
+		// ゲーム処理
+		game cnt
+
+		// 仮想イメージから転送
+		alCopyImageToScreen 0, 0
+
+		redraw 1
+		await 1000/60
+	loop
+
+	

@@ -1,0 +1,54 @@
+// 徐々に速くなる弾
+
+#module Bullet_TYPE2 labels, data
+#modinit double _x, double _y, double _angle, double _speed
+
+	// ラベルの設定
+	ldim labels, LABEL_NUM
+	labels.LABEL_DISPLAY = *l_display // オーバーライドする
+	labels.LABEL_UPDATE = *l_update // オーバーライドする
+
+	// データの設定
+	ddim data, DATA_NUM
+	data.DATA_X = _x
+	data.DATA_Y = _y
+	data.DATA_ANGLE = _angle
+	data.DATA_SPEED = _speed
+	
+	return
+
+// 描画本体（ラベル側だとモジュール変数が使えない（なんで？））
+#modfunc Bullet_TYPE2_display
+
+	r = 4
+	alColor 220, 180, 180
+	alFillEllip data.DATA_X-r, data.DATA_Y-r, r*2, r*2
+
+	r = 7
+	alColor 255, 255, 80
+	alDrawEllip data.DATA_X-r, data.DATA_Y-r, r*2, r*2
+
+	return
+
+// 描画
+*l_display
+	Bullet_TYPE2_display thismod
+	return
+
+// 更新本体
+#modfunc Bullet_TYPE2_update
+
+	data.DATA_SPEED += 0.03
+	if(data.DATA_SPEED > 0.72):data.DATA_SPEED = 0.72 // 速度制限
+	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+
+	return
+
+
+// 更新
+*l_update
+	Bullet_TYPE2_update thismod
+	return
+
+#global

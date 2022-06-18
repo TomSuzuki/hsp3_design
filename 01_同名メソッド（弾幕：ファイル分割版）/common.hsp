@@ -1,0 +1,13 @@
+
+#module
+// ŠÈˆÕFPSŒv‘ª
+#defcfunc getFps
+	count++
+	if(ptime != gettime(6)){
+		fps = count
+		count = 0
+	}
+	ptime = gettime(6)
+	return fps
+
+#global

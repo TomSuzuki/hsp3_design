@@ -1,0 +1,65 @@
+// 弾の基盤モジュール
+
+// ラベル管理定数
+#enum global LABEL_DISPLAY 0
+#enum global LABEL_UPDATE
+#enum global LABEL_NUM
+
+
+// データ管理定数
+#enum global DATA_X = 0
+#enum global DATA_Y
+#enum global DATA_ANGLE
+#enum global DATA_SPEED
+#enum global DATA_NUM
+
+
+// モジュール本体
+#module BulletInterface labels, data // フィールドは順番・変数名をそろえる
+
+// 描画
+#modfunc display
+
+	// オーバーライド
+	if(vartype(labels) == vartype("label")){
+		if(varuse(labels.LABEL_DISPLAY)){
+			gosub labels.LABEL_DISPLAY
+			return
+		}
+	}
+
+	// 親の処理を使う
+	r = 7
+	alColor 255, 255, 255, 190
+	alFillEllip data.DATA_X-r, data.DATA_Y-r, r*2, r*2
+
+	r = 9
+	alColor 255, 255, 255, 255
+	alDrawEllip data.DATA_X-r, data.DATA_Y-r, r*2, r*2
+
+	return
+
+// 更新
+#modfunc update
+
+	// 画面外は強制削除
+	margin = 64
+	if(data.DATA_X != limitf(data.DATA_X, -margin, ginfo_winx + margin) || data.DATA_Y != limitf(data.DATA_Y, -margin, ginfo_winy + margin)){
+		delmod thismod
+		return
+	}
+
+	// オーバーライド
+	if(vartype(labels) == vartype("label")){
+		if(varuse(labels.LABEL_UPDATE)){
+			gosub labels.LABEL_UPDATE
+			return // すべてに対して同じ処理をしたいなら return をつけなくてもいいかも
+		}
+	}
+
+	// 親の処理を使う
+	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+
+	return
+#global

@@ -1,0 +1,76 @@
+// ゲーム本体です。
+// 命令で実装していますが、モジュールにしたほうがいろいろ自由がきくと思います。
+
+#module
+// 初期化
+#deffunc gameInit
+
+	// 弾の初期化
+	dimtype bullet, vartype("struct")
+	
+	return
+
+// 本体
+#deffunc game int _time
+
+	// 出現処理の呼び出し
+	addBullet _time, 320, 110	// 本来は敵オブジェクトが行う処理
+
+	// 弾の更新
+	foreach bullet
+		update bullet.cnt
+	loop
+
+	// 背景の塗りつぶし
+	alColor 0, 0, 0, 255
+	alFillRect 0, 0, 640, 480
+
+	// 弾の描画
+	foreach bullet
+		display bullet.cnt
+	loop
+
+	// デバッグ描画
+	alColor 255, 255, 255, 255
+	alDrawText strf("FPS: %d", getFps()), 5, 430, 200, 50, 0, 2
+
+	return
+
+// 弾出現処理（本来は敵のモジュールに書く）
+// 技？ごとに関数定義をすると呼び出しが簡単かも？
+  // ex. 現在時間, 技開始時間
+#deffunc addBullet int _time, int _x, int _y
+
+	// 出現座標
+	x = _x
+	y = _y
+
+	// Type 1
+	if(_time \ 42 == 0){
+		d = cnt \ 360
+		repeat 36
+			ang = cnt * 360 / 36 + d
+			newmod bullet, Bullet_TYPE1, x, y, ang, 0.99
+		loop
+	}
+
+	// Type 2
+	if(_time \ 16 == 0){
+		d = cnt \ 360
+		repeat 4
+			ang = cnt * 360 / 180 - d
+			newmod bullet, Bullet_TYPE2, x, y, ang, 0
+		loop
+	}
+
+	// Type 3
+	if(_time \ 18 == 0){
+		d = cnt \ 360
+		repeat 8
+			ang = cnt * 360 / 8 - d
+			newmod bullet, Bullet_TYPE3, x, y, ang, -5
+		loop
+	}
+
+	return
+#global
