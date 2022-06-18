@@ -57,7 +57,7 @@
 	if(vartype(labels) == vartype("label")){
 		if(varuse(labels.LABEL_UPDATE)){
 			gosub labels.LABEL_UPDATE
-			return // すべて同じ処理をしたいなら return をつけなくてもいいかも
+			return // すべてに対して同じ処理をしたいなら return をつけなくてもいいかも
 		}
 	}
 
@@ -147,8 +147,8 @@
 
 // --------------------------------------------------------------------------------------------- //
 
-// Uターンする弾
-#module Bullet_TYPE3 labels, data
+// Uターンする弾（追加のモジュール変数を持たせる）
+#module Bullet_TYPE3 labels, data, time
 #modinit double _x, double _y, double _angle, double _speed
 
 	// ラベルの設定
@@ -162,6 +162,9 @@
 	data.DATA_Y = _y
 	data.DATA_ANGLE = _angle
 	data.DATA_SPEED = _speed
+
+	// 追加の変数
+	time = 0
 	
 	return
 
@@ -169,7 +172,7 @@
 #modfunc Bullet_TYPE3_display
 
 	r = 11
-	color 80, 100, 160
+	hsvcolor (time*3)\191, 199, 255
 	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 1
 
 	r = 6
@@ -186,6 +189,7 @@
 // 更新本体
 #modfunc Bullet_TYPE3_update
 
+	time++
 	data.DATA_SPEED += 0.12
 	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
 	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
@@ -242,12 +246,12 @@
 			loop
 		}
 
-		// 更新
+		// 更新（すべての弾）
 		foreach bullet
 			update bullet.cnt
 		loop
 
-		// 描画
+		// 描画（すべての弾）
 		color 0:boxf
 		foreach bullet
 			display bullet.cnt
