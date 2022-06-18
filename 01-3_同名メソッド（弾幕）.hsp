@@ -1,0 +1,304 @@
+// 基盤モジュールと同じコンストラクタを使えないか考えてみる
+
+
+#include "d3m.hsp" // FPS表示用
+
+// ラベル管理定数
+#enum global LABEL_DISPLAY 0
+#enum global LABEL_UPDATE
+#enum global LABEL_DESTRUCTOR
+#enum global LABEL_NUM
+
+// データ管理定数
+#enum global DATA_X = 0
+#enum global DATA_Y
+#enum global DATA_ANGLE
+#enum global DATA_SPEED
+#enum global DATA_NUM
+
+// --------------------------------------------------------------------------------------------- //
+
+// 弾の基盤モジュール（親）
+#module BulletInterface labels, data // フィールドは順番・変数名をそろえる
+
+// 基盤コンストラクタ
+#modfunc constructor array _labels, array _data, double _x, double _y, double _angle, double _speed
+
+	// ラベルの初期化
+	ldim _labels, LABEL_NUM
+	_labels.LABEL_DESTRUCTOR = *BulletInterface_label_destructor	// 共通デストラクタを設定
+
+	// データの設定
+	ddim _data, DATA_NUM
+	_data.DATA_X = _x
+	_data.DATA_Y = _y
+	_data.DATA_ANGLE = _angle
+	_data.DATA_SPEED = _speed
+
+	return
+
+// 共通デストラクタ
+*BulletInterface_label_destructor
+	// メモリ開放処理など
+	return
+
+// 描画
+#modfunc display
+
+	// オーバーライド
+	if(vartype(labels) == vartype("label")){
+		if(varuse(labels.LABEL_DISPLAY)){
+			gosub labels.LABEL_DISPLAY
+			return
+		}
+	}
+
+	// 親の処理を使う
+	r = 7
+	color 255, 255, 255
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 1
+
+	r = 9
+	color 255, 255, 255
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 0
+
+	return
+
+// 更新
+#modfunc update
+
+	// 画面外は強制削除
+	margin = 64
+	if(data.DATA_X != limitf(data.DATA_X, -margin, ginfo_winx + margin) || data.DATA_Y != limitf(data.DATA_Y, -margin, ginfo_winy + margin)){
+		delmod thismod
+		return
+	}
+
+	// オーバーライド
+	if(vartype(labels) == vartype("label")){
+		if(varuse(labels.LABEL_UPDATE)){
+			gosub labels.LABEL_UPDATE
+			return // すべてに対して同じ処理をしたいなら return をつけなくてもいいかも
+		}
+	}
+
+	// 親の処理を使う
+	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+
+	return
+#global
+
+// --------------------------------------------------------------------------------------------- //
+
+// 通常の弾
+#module Bullet_TYPE1 labels, data
+#modinit double _x, double _y, double _angle, double _speed
+	
+	// 親のコンストラクタを呼び出す
+	constructor thismod, labels, data, _x, _y, _angle, _speed
+
+	// ラベルの設定
+	;labels.LABEL_DISPLAY // オーバーライドしない
+	;labels.LABEL_UPDATE // オーバーライドしない
+	
+	return
+
+// デストラクタを呼ぶ（基本的に基盤モジュールのデストラクタを呼ぶ）
+#modterm
+	gosub labels.LABEL_DESTRUCTOR
+	return
+	
+#global
+
+// --------------------------------------------------------------------------------------------- //
+
+// 徐々に早くなる弾
+#module Bullet_TYPE2 labels, data
+#modinit double _x, double _y, double _angle, double _speed
+
+	// 親のコンストラクタを呼び出す
+	constructor thismod, labels, data, _x, _y, _angle, _speed
+
+	// ラベルの設定
+	labels.LABEL_DISPLAY = *l_display // オーバーライドする
+	labels.LABEL_UPDATE = *l_update // オーバーライドする
+	
+	return
+
+// 描画本体（ラベル側だとモジュール変数が使えない（なんで？））
+#modfunc Bullet_TYPE2_display
+
+	r = 4
+	color 220, 180, 180
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 1
+
+	r = 7
+	color 255, 255, 80
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 0
+
+	return
+
+// デストラクタを呼ぶ
+#modterm
+	gosub labels.LABEL_DESTRUCTOR
+	return
+
+// 描画
+*l_display
+	Bullet_TYPE2_display thismod
+	return
+
+// 更新本体
+#modfunc Bullet_TYPE2_update
+
+	data.DATA_SPEED += 0.08
+	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+
+	return
+
+
+// 更新
+*l_update
+	Bullet_TYPE2_update thismod
+	return
+
+#global
+
+// --------------------------------------------------------------------------------------------- //
+
+// Uターンする弾（追加のモジュール変数を持たせる）
+#module Bullet_TYPE3 labels, data, time
+#modinit double _x, double _y, double _angle, double _speed
+
+	// 親のコンストラクタを呼び出す
+	constructor thismod, labels, data, _x, _y, _angle, _speed
+
+	// ラベルの設定
+	labels.LABEL_DISPLAY = *l_display // オーバーライドする
+	labels.LABEL_UPDATE = *l_update // オーバーライドする
+
+	// 追加の変数
+	time = 0
+	
+	return
+
+// デストラクタを呼ぶ
+#modterm
+	gosub labels.LABEL_DESTRUCTOR
+	return
+	
+// 描画本体
+#modfunc Bullet_TYPE3_display
+
+	r = 11
+	hsvcolor (time*3)\191, 199, 255
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 1
+
+	r = 6
+	color 220, 220, 255
+	circle data.DATA_X - r, data.DATA_Y - r, data.DATA_X + r, data.DATA_Y + r, 1
+
+	return
+
+// 描画
+*l_display
+	Bullet_TYPE3_display thismod
+	return
+
+// 更新本体
+#modfunc Bullet_TYPE3_update
+
+	time++
+	data.DATA_SPEED += 0.12
+	data.DATA_X += sin(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+	data.DATA_Y += cos(deg2rad(data.DATA_ANGLE)) * data.DATA_SPEED
+
+	return
+
+
+// 更新
+*l_update
+	Bullet_TYPE3_update thismod
+	return
+
+#global
+
+// --------------------------------------------------------------------------------------------- //
+
+	// 弾の初期化
+	dimtype bullet, vartype("struct")
+
+	// 描画設定
+	font msgothic, 12, 1
+
+	// メイン
+	repeat
+		redraw 0
+
+		// 出現座標
+		setease -20, 20, ease_quad_inout + ease_loop
+		x = 320 + getease(cnt, 90)
+		y = 100
+
+		// 生成
+		if(cnt \ 22 == 0){
+			
+			// Bullet_TYPE1（本来は敵オブジェクトから生成する）
+			d = cnt \ 360
+			repeat 36
+				ang = cnt * 360 / 36 + d
+				newmod bullet, Bullet_TYPE1, x, y, ang, 0.99
+			loop
+
+			// Bullet_TYPE2（本来は敵オブジェクトから生成する）
+			d = cnt \ 360
+			repeat 12
+				ang = cnt * 360 / 12 - d
+				newmod bullet, Bullet_TYPE2, x, y, ang, 0
+			loop
+
+			// Bullet_TYPE3（本来は敵オブジェクトから生成する）
+			d = cnt \ 360
+			repeat 8
+				ang = cnt * 360 / 8 - d
+				newmod bullet, Bullet_TYPE3, x, y, ang, -5
+			loop
+		}
+
+		// 更新（すべての弾）
+		foreach bullet
+			update bullet.cnt
+		loop
+
+		// 描画（すべての弾）
+		color 0:boxf
+		foreach bullet
+			display bullet.cnt
+		loop
+
+		// 敵のダミー
+		r = 40
+		color 20, 180, 255
+		argx = x-sin(deg2rad(-cnt))*r, x-sin(deg2rad(-cnt+90))*r, x-sin(deg2rad(-cnt+180))*r, x-sin(deg2rad(-cnt+270))*r
+		argy = y-cos(deg2rad(-cnt))*r, y-cos(deg2rad(-cnt+90))*r, y-cos(deg2rad(-cnt+180))*r, y-cos(deg2rad(-cnt+270))*r
+		gsquare -1, argx, argy
+		r = 25
+		color 220, 220, 255
+		argx = x-sin(deg2rad(cnt))*r, x-sin(deg2rad(cnt+90))*r, x-sin(deg2rad(cnt+180))*r, x-sin(deg2rad(cnt+270))*r
+		argy = y-cos(deg2rad(cnt))*r, y-cos(deg2rad(cnt+90))*r, y-cos(deg2rad(cnt+180))*r, y-cos(deg2rad(cnt+270))*r
+		gsquare -1, argx, argy
+
+		// デバッグ表示
+		color 20, 20, 20
+		boxf 0, 0, 120, 60
+		color 255, 255, 255
+		pos 5,5
+		mes strf("FPS: %2.3f", d3getfps())
+		mes strf("TIME: %d", cnt)
+		mes strf("BULLET_CNT: %d", length(bullet) - 1)
+
+		redraw 1
+		await 1000/60
+	loop
