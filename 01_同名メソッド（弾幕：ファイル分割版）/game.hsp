@@ -18,7 +18,7 @@
 
 	// ’e‚ÌXV
 	foreach bullet
-		update bullet.cnt
+		update@BulletInterface bullet.cnt
 	loop
 
 	// ”wŒi‚Ì“h‚è‚Â‚Ô‚µ
@@ -27,7 +27,7 @@
 
 	// ’e‚Ì•`‰æ
 	foreach bullet
-		display bullet.cnt
+		display@BulletInterface bullet.cnt
 	loop
 
 	// ƒfƒoƒbƒO•`‰æ

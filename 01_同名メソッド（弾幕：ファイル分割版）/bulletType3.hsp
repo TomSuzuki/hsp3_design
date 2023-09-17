@@ -21,7 +21,7 @@
 	return
 
 // 描画本体
-#modfunc Bullet_TYPE3_display
+#modfunc local display
 
 	r = 11
 	alHsvColor (time)\191, 255, 180, 75
@@ -35,11 +35,11 @@
 
 // 描画
 *l_display
-	Bullet_TYPE3_display thismod
+	display thismod
 	return
 
 // 更新本体
-#modfunc Bullet_TYPE3_update
+#modfunc local update
 
 	time++
 	data.DATA_SPEED += 0.05	// 上側の画面外へ行って消え、下には来ないことも
@@ -51,7 +51,7 @@
 
 // 更新
 *l_update
-	Bullet_TYPE3_update thismod
+	update thismod
 	return
 
 #global

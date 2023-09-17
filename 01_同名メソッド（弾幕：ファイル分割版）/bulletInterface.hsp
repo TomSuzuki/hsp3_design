@@ -18,7 +18,7 @@
 #module BulletInterface labels, data // フィールドは順番・変数名をそろえる
 
 // 描画
-#modfunc display
+#modfunc local display
 
 	// オーバーライド
 	if(vartype(labels) == vartype("label")){
@@ -40,7 +40,7 @@
 	return
 
 // 更新
-#modfunc update
+#modfunc local update
 
 	// 画面外は強制削除
 	margin = 64

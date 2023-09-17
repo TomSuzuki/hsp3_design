@@ -18,7 +18,7 @@
 	return
 
 // 描画本体（ラベル側だとモジュール変数が使えない（なんで？））
-#modfunc Bullet_TYPE2_display
+#modfunc local display
 
 	r = 4
 	alColor 220, 180, 180
@@ -32,11 +32,11 @@
 
 // 描画
 *l_display
-	Bullet_TYPE2_display thismod
+	display thismod
 	return
 
 // 更新本体
-#modfunc Bullet_TYPE2_update
+#modfunc local upate
 
 	data.DATA_SPEED += 0.03
 	if(data.DATA_SPEED > 0.72):data.DATA_SPEED = 0.72 // 速度制限
@@ -48,7 +48,7 @@
 
 // 更新
 *l_update
-	Bullet_TYPE2_update thismod
+	upate thismod
 	return
 
 #global
